@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { sidebar, changeBoardName } from '$lib/store';
+	import { sidebar, changeBoardName, wallpaperSt } from '$lib/store';
 	import {
 		Check,
 		ChevronLeft,
@@ -19,6 +19,14 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { enhance } from '$app/forms';
+	import { beforeNavigate } from '$app/navigation';
+
+	export let data
+
+
+	$: ({allBoards} = data)
 
 	const wallpapers = [
 		'https://images.unsplash.com/photo-1692374227159-2d3592f274c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHx0b3BpYy1mZWVkfDR8Ym84alFLVGFFMFl8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=60',
@@ -35,14 +43,21 @@
 		'radial-gradient( circle farthest-corner at 10% 20%,  rgba(171,102,255,1) 0%, rgba(116,182,247,1) 90% )'
 	];
 
+
 	let sortBoard = 'alphabetically';
-	let boardName: string = 'learn';
+	$: urlboardParam = $page.params.boardName;
+	$: boardName = urlboardParam
 	let boardNameEl: HTMLHeadingElement;
 	let boardNameWidth: number;
 	let boardNameInput: HTMLInputElement;
 
 	let wallpapersWrapper: HTMLUListElement;
 	let colorsWrapper: HTMLUListElement;
+
+	
+	
+
+	// let mainWallpaper = allBoards[0].wallpaper
 
 	let wallpaper = `url(${wallpapers[0]})`;
 	function getWallpaper(e: Event) {
@@ -73,7 +88,7 @@
 
 	function getBoardNameWidh() {
 		boardNameWidth = boardNameEl.getBoundingClientRect().width;
-		console.log(boardNameWidth);
+		console.log(boardNameWidth)
 	}
 
 	function SetchangeBoardName() {
@@ -84,17 +99,25 @@
 
 	onMount(() => {
 		boardNameWidth = boardNameEl.getBoundingClientRect().width;
-		boardNameInput.focus();
-		boardNameInput.select();
+		// boardNameInput.focus();
+		// boardNameInput.select();
 	});
+
+	beforeNavigate(async() => {
+		// console.log(boardNameEl.getBoundingClientRect().width)
+
+		// boardNameWidth = boardNameEl.getBoundingClientRect().width
+	})
+
+
 </script>
 
-<main class="h-[100dvh] w-[100vw] flex bg-[darkorange]">
+<main class="h-[100dvh] w-[100vw] flex " style="background-image: {$wallpaperSt};">
 	{#if $sidebar}
 		<aside
-			class="w-[248px] h-full text-primary-foreground relative bg-[#0000003d] border-r border-muted-foreground flex-shrink-0"
+			class="w-[248px] h-full text-primary-foreground bg-[#0000003d] border-r border-muted-foreground flex-shrink-0"
 		>
-			<div class="w-full h-full absolute left-0">
+			<div class="w-full h-full  ">
 				<div
 					class="h-[70px] w-full border-y border-muted-foreground flex items-center px-2 justify-between"
 				>
@@ -152,64 +175,84 @@
 										</div>
 										<div class="mt-4 flex flex-col gap-1.5">
 											<h3 class="text-sm">wallpaper</h3>
+											<!-- create board form -->
+											<form action="/b?/createBoard" method="POST" class="w-full">
 											<div class="w-full flex flex-col gap-1">
 												<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 												<!-- svelte-ignore a11y-click-events-have-key-events -->
-												<ul
-													bind:this={wallpapersWrapper}
-													on:click={getWallpaper}
-													class="flex items-center gap-1"
-												>
-													{#each wallpapers as img}
-														<li class="flex-grow flex-shrink">
-															<button
-																data-check="off"
-																style=" --img: url({img})"
-																class="wallBtn outline-none border-none flex items-center justify-center w-full h-[40px]"
-															>
-																<span class="text-primary">
-																	<Check color="#ffffff" class="icon" />
-																</span>
-															</button>
-														</li>
-													{/each}
-												</ul>
-												<!-- svelte-ignore a11y-click-events-have-key-events -->
-												<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-												<ul
-													bind:this={colorsWrapper}
-													on:click={getWallpaper}
-													class="flex w-full gap-1"
-												>
-													{#each colors as color}
-														<li class="flex-grow flex-shrink">
-															<button
-																data-check="off"
-																style=" background-image: {color}"
-																class="colorBtn outline-none border-none w-full h-[40px] flex items-center justify-center"
-															>
-																<span class="text-primary">
-																	<Check color="#ffffff" class="icon" />
-																</span>
-															</button>
-														</li>
-													{/each}
-												</ul>
+													<ul
+														bind:this={wallpapersWrapper}
+														on:click={getWallpaper}
+														class="flex items-center gap-1"
+													>
+														{#each wallpapers as img}
+														
+															<li class="flex-grow flex-shrink">
+																<button
+																type="button"
+																	data-check="off"
+																	style=" --img: url({img})"
+																	class="wallBtn outline-none border-none flex items-center justify-center w-full h-[40px]"
+																>
+																	<span class="text-primary">
+																		<Check color="#ffffff" class="icon" />
+																	</span>
+																</button>
+															</li>
+														{/each}
+													</ul>
+													<!-- svelte-ignore a11y-click-events-have-key-events -->
+													<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+													<ul
+														bind:this={colorsWrapper}
+														on:click={getWallpaper}
+														class="flex w-full gap-1"
+													>
+														{#each colors as color}
+															<li class="flex-grow flex-shrink">
+																<button
+																type="button"
+																	data-check="off"
+																	style=" background-image: {color}"
+																	class="colorBtn outline-none border-none w-full h-[40px] flex items-center justify-center"
+																>
+																	<span class="text-primary">
+																		<Check color="#ffffff" class="icon" />
+																	</span>
+																</button>
+															</li>
+														{/each}
+													</ul>
+												</div>
+												<div class="grid w-full max-w-sm items-center gap-1.5 mt-2">
+												<label for="table"><span class="text-sm">title of table</span></label>
+												<Input type="text" id="board" name="name" autocomplete="off" />
+												<Input type="hidden" name="wallpaper" value={wallpaper} />
+												<!-- <p class="text-sm text-muted-foreground">Enter your email address.</p> -->
 											</div>
-										</div>
-										<div class="grid w-full max-w-sm items-center gap-1.5 mt-2">
-											<label for="table"><span class="text-sm">title of table</span></label>
-											<Input type="text" id="table" name="titleTable" />
-											<Input type="hidden" name="wallpaper" value={wallpaper} />
-											<!-- <p class="text-sm text-muted-foreground">Enter your email address.</p> -->
-										</div>
-										<div class="w-full">
-											<Button class="w-full">Create</Button>
-										</div>
+											<div class="w-full mt-2">
+												<Button type="submit" class="w-full">Create</Button>
+											</div>
+											</form>
+											</div>
 									</div>
 								</Popover.Content>
 							</Popover.Root>
 						</div>
+					</div>
+					<div class="w-full mt-2 flex flex-col">
+						{#each allBoards as board}
+					<a href="/b/{board.id}/{board.name}" class="block text-primary-foreground hover:bg-icon" data-boardId={board.id} class:bg-[hsla(0,0%,100%,0.30)]={$page.url.pathname == `/b/${board.id}/${board.name}`}>
+						<div class="w-full px-2 flex  py-1 gap-1">
+							<div class="w-[24px] h-[20px] bg-cover" style="background-image: {board.wallpaper};" >
+							</div>
+							<div class=" overflow-ellipsis overflow-x-clip w-full whitespace-nowrap flex-grow-1 flex-shrink-1">
+							{board.name}
+							</div>
+
+						</div>
+					</a>
+						{/each}
 					</div>
 				</nav>
 			</div>
@@ -221,7 +264,7 @@
 	<!--  -->
 
 	<section class="flex-grow flex flex-col h-full overflow-hidden relative">
-		<header class="w-full h-[76px] bg-[#0000003d] relative overflow-hidden">
+		<header  class="w-full min-h-[70px] bg-[#0000003d] relative ">
 			{#if !$sidebar}
 				<Button
 					on:click={() => sidebar.set(true)}
@@ -233,39 +276,43 @@
 				</Button>
 			{/if}
 
-			<div class="boardname w-full h-full pl-14 pr-2 flex items-center justify-between">
+			<div class="boardname w-full h-full pl-14 pr-2 flex   items-center justify-between relative">
 				<div
-					class=" h-full flex flex-col items-center justify-center relative"
-					style="flex-basis: {boardNameWidth + 20}px;"
+					class=" min-h-full flex flex-col items-start justify-center flex-shrink-0 flex-grow relative max-w-full  "
+					style="flex-basis: auto; width: {boardNameWidth}px;"
 				>
-					<label for="boardName" class="" class:hidden-input={!$changeBoardName}>
-						<input
-							bind:this={boardNameInput}
-							on:change={() => {
-								$changeBoardName = false;
-							}}
-							on:keyup={getBoardNameWidh}
-							id="boardName"
-							type="text"
-							bind:value={boardName}
-							style="width: {boardNameWidth + 10}px;"
-							class="  px-1 py-1 font-semibold box-content text-left"
-						/>
-					</label>
+					<form action="?/editBoardName" method="POST" use:enhance class="w-full h-full absolute top-[50%] translate-y-[-20%]">
+						<label for="boardName" class="bg-blue-500" class:hidden-input={!$changeBoardName} >
+							<input
+								bind:this={boardNameInput}
+								on:change={() => {
+									$changeBoardName = false;
+								}}
+								on:keyup={getBoardNameWidh}
+								id="boardName"
+								type="text"
+								bind:value={boardName}
+								name="name"
+								style="width: {boardNameWidth}px; "
+								class="  px-1 py-1 font-semibold text-left "
+							/>
+						</label>
+					</form>
 
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 					<h1
 						bind:this={boardNameEl}
 						on:click={SetchangeBoardName}
-						class="text-primary-foreground text-lg font-semibold cursor-pointer absolute -z-10"
+						class="text-primary-foreground text-lg font-semibold cursor-pointer absolute  hover:bg-icon -z-10 whitespace-nowrap "
 						class:hidden-board-name={!$changeBoardName}
+						
 					>
 						{boardName}
 					</h1>
 				</div>
 
-				<div class="h-full flex gap-2">
+				<div class="h-full flex gap-2 flex-shrink-0 flex-grow-1">
 					<div class="h-full flex items-center">
 						<Popover.Root>
 							<Popover.Trigger>
@@ -429,7 +476,7 @@
 
 	.hidden-board-name {
 		z-index: 10;
-		background-color: inherit;
+		background-color: transparent;
 		padding: 20px;
 	}
 
@@ -438,4 +485,13 @@
    height: 48px;
    border-radius: 8px;
   }
+
+
+	main {
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-position: center;
+	}
+
+	
 </style>
